@@ -1,14 +1,38 @@
 import React, { Component } from "react";
-import { View, Text } from "react-native";
+import {
+  View,
+  Text,
+  TouchableWithoutFeedback,
+  LayoutAnimation
+} from "react-native";
+import { connect } from "react-redux";
 import { CardSection } from "../common";
+import * as actions from "../actions";
 
-const ListItem = ({ library }) => {
-  return (
-    <CardSection>
-      <Text style={styles.titleStyle}>{library.item.title}</Text>
-    </CardSection>
-  );
-};
+class ListItem extends Component {
+  componentWillMount() {
+    LayoutAnimation.spring();
+  }
+
+  renderDescription = () => {
+    if (this.props.expanded) {
+      return <Text>{this.props.library.item.description}</Text>;
+    }
+  };
+  render() {
+    const { id, title } = this.props.library.item;
+    return (
+      <TouchableWithoutFeedback onPress={() => this.props.selectLibrary(id)}>
+        <View>
+          <CardSection>
+            <Text style={styles.titleStyle}>{title}</Text>
+          </CardSection>
+          <CardSection>{this.renderDescription()}</CardSection>
+        </View>
+      </TouchableWithoutFeedback>
+    );
+  }
+}
 
 const styles = {
   titleStyle: {
@@ -17,4 +41,12 @@ const styles = {
   }
 };
 
-export default ListItem;
+const mapSateToProps = (state, ownProps) => {
+  const expanded = state.selectedLibraryId === ownProps.library.item.id;
+  return { expanded };
+};
+
+export default connect(
+  mapSateToProps,
+  actions
+)(ListItem);
